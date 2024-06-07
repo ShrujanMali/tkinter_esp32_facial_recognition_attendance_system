@@ -20,20 +20,17 @@ if not os.path.isdir('static/faces'):
 if not os.path.isdir('Attendance'):
     os.makedirs('Attendance')
 if f'Attendance_sheet.xlsx' not in os.listdir('Attendance'):
-    columns = ['No.', 'Surname', 'Name', 'M/F', 'Shivir']
+    columns = ['No.', 'Surname', 'Name', 'M/F', 'Standard']
     # Create a DataFrame with the specified columns
     df = pd.DataFrame(columns=columns)
     # Save the DataFrame to an Excel file
     df.to_excel('Attendance/Attendance_sheet.xlsx', index=False)
 
 attendance_sheet = r'Attendance/Attendance_sheet.xlsx'
-# url='http://192.168.31.227/cam-hi.jpg'   # Replace with actual URL of the camera
 url = 'http://192.168.1.101/cam-hi.jpg'    # bothesp32
-# url = 'http://192.168.1.101/cam-hi.jpg'
 face_detector = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
 nimgs = 10
 
-# Function to extract faces from a frame (Dummy function; replace with actual implementation)
 def extract_faces(img):
     try:
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -42,9 +39,7 @@ def extract_faces(img):
     except:
         return []
 
-# Function to train the model (Dummy function; replace with actual implementation)
 def train_model():
-    # Replace with actual model training logic
     faces = []
     labels = []
     userlist = os.listdir('static/faces')
@@ -91,23 +86,17 @@ def add_attendance(name):
         df.to_excel(attendance_sheet, index=False)
 
 
-def add_khoji():
-    # url='http://192.168.31.227/cam-hi.jpg'
-    ############################################################################################
+def add_student():
     def handle_gender_selection(event):
         selected_gender = gender_combobox.get()
-        # Check if user selected "Select from list"
         if selected_gender == "Select from list":
-            # Disable submit button (replace with error message if needed)
             submit_button["state"] = tk.DISABLED
         else:
-            # Enable submit button
             submit_button["state"] = tk.NORMAL
 
-    ############################################################################################
 
 
-    def submit_khoji():
+    def submit_student():
         name = entry_first_name.get()
            # Replace with actual URL of the camera
 
@@ -116,19 +105,19 @@ def add_khoji():
             messagebox.showerror("Invalid Input", 
                                 "Name must contain only alphabets.")
 
-        if entry_first_name.get() and entry_surname.get() and entry_shivir.get() and gender_combobox.get():
+        if entry_first_name.get() and entry_surname.get() and entry_standard.get() and gender_combobox.get():
             first_name = entry_first_name.get().title().strip()
             surname = entry_surname.get().title().strip()
-            shivir = entry_shivir.get().upper().strip()
+            standard = entry_standard.get().upper().strip()
             gender = gender_combobox.get().title().strip()
             print("info", first_name + " " + surname )
             df = pd.read_excel(attendance_sheet)
             for index, row in df.iloc[:].iterrows():
                 if (row['Name'] == first_name) and (row['Surname'] == surname):
-                    messagebox.showinfo("Error", "Person is already in the list")
+                    messagebox.showinfo("Error", "Student is already in the list")
                     return
             else:
-                # messagebox.showinfo("Info", f"Starting camera for capturing photos of khoji '{first_name} {surname}'.")
+                messagebox.showinfo("Info", f"Starting camera for capturing photos of student '{first_name} {surname}'.")
                 name_drive = 'static/faces/' + first_name + " " + surname
                 if not os.path.isdir(name_drive):
                     os.makedirs(name_drive)
@@ -150,19 +139,18 @@ def add_khoji():
                             i += 1
                         j += 1
                     if j == nimgs * 5:
+                        cv2.destroyAllWindows()
+                        max_no = df['No.'].max() if not df.empty else 0
+                        new_student_data = {'No.': max_no + 1, 'Surname': surname, 'Name': first_name, 'M/F': gender, 'Standard': standard}
+                        df = df._append(new_student_data, ignore_index=True)
+                        df.to_excel(attendance_sheet, index=False)
+                        train_model()
+                        messagebox.showinfo("Success", "Student added successfully")
+                        add_student_window.destroy()
                         break
                     cv2.imshow('Adding new User', frame)
                     if cv2.waitKey(1) == 27:  # Press 'ESC' to break
-                        break
-
-                cv2.destroyAllWindows()
-                max_no = df['No.'].max() if not df.empty else 0
-                new_student_data = {'No.': max_no + 1, 'Surname': surname, 'Name': first_name, 'M/F': gender, 'Shivir': shivir}
-                df = df._append(new_student_data, ignore_index=True)
-                df.to_excel(attendance_sheet, index=False)
-                train_model()
-                messagebox.showinfo("Success", "Khoji added successfully")
-                add_khoji_window.destroy()
+                        break                
                 return
         else:
             messagebox.showwarning("Warning", "Please fill all the fields")
@@ -170,27 +158,26 @@ def add_khoji():
 
             
 
-    # Create a new window for adding Khoji
-    add_khoji_window = tk.Toplevel(root)
-    add_khoji_window.title("Add New Khoji")
-    add_khoji_window.geometry("300x300")
+    add_student_window = tk.Toplevel(root)
+    add_student_window.title("Add New Student")
+    add_student_window.geometry("300x300")
 
-    tk.Label(add_khoji_window, text="First Name").pack(pady=5)
-    entry_first_name = tk.Entry(add_khoji_window)
+    tk.Label(add_student_window, text="First Name").pack(pady=5)
+    entry_first_name = tk.Entry(add_student_window)
     entry_first_name.pack(pady=5)
 
-    tk.Label(add_khoji_window, text="Surname").pack(pady=5)
-    entry_surname = tk.Entry(add_khoji_window)
+    tk.Label(add_student_window, text="Surname").pack(pady=5)
+    entry_surname = tk.Entry(add_student_window)
     entry_surname.pack(pady=5)
 
-    tk.Label(add_khoji_window, text="Shivir").pack(pady=5)
-    entry_shivir = tk.Entry(add_khoji_window)
-    entry_shivir.pack(pady=5)
+    tk.Label(add_student_window, text="Standard").pack(pady=5)
+    entry_standard = tk.Entry(add_student_window)
+    entry_standard.pack(pady=5)
 
 
     #######################################################################################################
     gender_options = ["Select from list", "Male", "Female"]
-    gender_combobox = ttk.Combobox(add_khoji_window, values=gender_options, state="readonly")
+    gender_combobox = ttk.Combobox(add_student_window, values=gender_options, state="readonly")
     gender_combobox.current(0)  # Set default value to "Select from list"
     gender_combobox.pack(pady=10)
 
@@ -206,21 +193,13 @@ def add_khoji():
             print("Form submitted with gender:", selected_gender)  # Simulate submission
 
     # Create submit button
-    submit_button = tk.Button(add_khoji_window, text="Submit", command=submit_khoji)
+    submit_button = tk.Button(add_student_window, text="Submit", command=submit_student)
     submit_button.pack(pady=10)
     # Initially disable the submit button
     submit_button["state"] = tk.DISABLED
 
-    ######################################################################################################
-
-    # tk.Label(add_khoji_window, text="Gender (Male/Female)").pack(pady=5)
-    # entry_gender = tk.Entry(add_khoji_window)
-    # entry_gender.pack(pady=5)
-
-    # tk.Button(add_khoji_window, text="Submit", command=submit_khoji).pack(pady=20)
 
 def mark_attendance():
-    # url='http://192.168.31.227/cam-hi.jpg'   # Replace with actual URL of the camera
 
     if 'face_recognition_model.pkl' not in os.listdir('static'):
         print('There is no trained model in the static folder. Please add a new face to continue.')
@@ -257,15 +236,14 @@ def mark_attendance():
         cv2.imread
 
 
-def update_khoji_profile():
-    # url='http://192.168.31.227/cam-hi.jpg'   # Replace with actual URL of the camera
+def update_student_profile():
 
-    def update_shivir(index, df):
-        shivir = simpledialog.askstring("Input", "Enter shivir:").upper()
-        if shivir:
-            df.at[index, 'Shivir'] = shivir
+    def update_standard(index, df):
+        standard = simpledialog.askstring("Input", "Enter standard:").upper()
+        if standard:
+            df.at[index, 'Standard'] = standard
             df.to_excel(attendance_sheet, index=False)
-            messagebox.showinfo("Success", "Shivir updated")
+            messagebox.showinfo("Success", "standard updated")
 
     def update_photo(first_name, surname):
         cv2.namedWindow("live transmission", cv2.WINDOW_AUTOSIZE)
@@ -305,16 +283,16 @@ def update_khoji_profile():
         cv2.destroyAllWindows()
         train_model()
 
-    def find_khoji(df, entry_first_name, entry_surname):
+    def find_student(df, entry_first_name, entry_surname):
         first_name = entry_first_name.get().title()
         surname = entry_surname.get().title()
         
         for index, row in df.iloc[:].iterrows():
             if (row['Name'] == first_name) and (row['Surname'] == surname):
-                messagebox.showinfo("Person Found", f"Person {first_name} {surname} is already in the list.")
+                messagebox.showinfo("Student Found", f"Student {first_name} {surname} is already in the list.")
                 
-                def on_update_shivir():
-                    update_shivir(index, df)
+                def on_update_standard():
+                    update_standard(index, df)
                     update_window.destroy()
                 
                 def on_update_photo():
@@ -324,7 +302,7 @@ def update_khoji_profile():
                 update_window = tk.Toplevel()
                 update_window.title("Update Options")
                 tk.Label(update_window, text="Choose an option to update:").pack(pady=10)
-                tk.Button(update_window, text="Update Shivir", command=on_update_shivir).pack(pady=5)
+                tk.Button(update_window, text="Update standard", command=on_update_standard).pack(pady=5)
                 tk.Button(update_window, text="Update Photo", command=on_update_photo).pack(pady=5)
                 tk.Button(update_window, text="Exit", command=update_window.destroy).pack(pady=5)
                 break
@@ -332,12 +310,10 @@ def update_khoji_profile():
             messagebox.showwarning("Not Found", "Person not found")
             return
 
-    # def update_khoji_profile():
     df = pd.read_excel(attendance_sheet)
     
-    # Create the main window for finding khoji
     root = tk.Tk()
-    root.title("Find Khoji")
+    root.title("Find Student")
     
     tk.Label(root, text="First Name:").grid(row=0, column=0, padx=10, pady=10)
     entry_first_name = tk.Entry(root)
@@ -347,7 +323,7 @@ def update_khoji_profile():
     entry_surname = tk.Entry(root)
     entry_surname.grid(row=1, column=1, padx=10, pady=10)
     
-    find_button = tk.Button(root, text="Find Khoji", command=lambda: find_khoji(df, entry_first_name, entry_surname))
+    find_button = tk.Button(root, text="Find Student", command=lambda: find_student(df, entry_first_name, entry_surname))
     find_button.grid(row=2, columnspan=2, pady=10)
     
     root.mainloop()
@@ -356,21 +332,21 @@ def on_exit():
     messagebox.showinfo("Exit", "Thank you")
     root.destroy()
 
-# Create the main window
 root = tk.Tk()
 root.title("Attendance System")
 root.geometry("300x300")
 
 
+
 # Create buttons for each option
-btn_add_khoji = tk.Button(root, text="1. Add new khoji", command=add_khoji, width=30, height=2)
-btn_add_khoji.pack(pady=10)
+btn_add_student = tk.Button(root, text="1. Add new Student", command=add_student, width=30, height=2)
+btn_add_student.pack(pady=10)
 
 btn_mark_attendance = tk.Button(root, text="2. Mark attendance", command=mark_attendance, width=30, height=2)
 btn_mark_attendance.pack(pady=10)
 
-btn_update_khoji = tk.Button(root, text="3. Find and update khoji", command=update_khoji_profile, width=30, height=2)
-btn_update_khoji.pack(pady=10)
+btn_update_student = tk.Button(root, text="3. Find and update Student", command=update_student_profile, width=30, height=2)
+btn_update_student.pack(pady=10)
 
 btn_exit = tk.Button(root, text="4. Exit", command=on_exit, width=30, height=2)
 btn_exit.pack(pady=10)
