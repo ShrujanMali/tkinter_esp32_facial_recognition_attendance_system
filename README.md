@@ -12,21 +12,21 @@ Features
 
 ## Screenshots
 
-Main page
+### Main page
 
 ![image](https://github.com/ShrujanMali/tkinter_esp32_facial_recognition_attendance_system/assets/86197841/46aa9c32-485a-472b-8394-5769a2fca59c)
 
-Add new student
+### Add new student
 
 ![image](https://github.com/ShrujanMali/tkinter_esp32_facial_recognition_attendance_system/assets/86197841/d0d0f976-3652-4666-8253-74f7d87c7d2a)
 
 
-Find student
+### Find student
 
 ![image](https://github.com/ShrujanMali/tkinter_esp32_facial_recognition_attendance_system/assets/86197841/8da1f272-ea98-4c07-a65a-af09f84c8d96)
 
 
-Technology used
+## Technology used
 
 <p align="center">
   <a href="https://skillicons.dev">
