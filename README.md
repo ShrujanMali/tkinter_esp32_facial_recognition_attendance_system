@@ -1,4 +1,4 @@
-# Project Title: IOT based face Recognition Attendance System using Tkinter
+# IOT based face Recognition Attendance System using Tkinter
 
 ## Overview
 
